@@ -28,7 +28,8 @@ import TodoList from "./components/TodoList";
   },
 ]; */
 //
-const initialStateTodos = JSON.parse(localStorage.getItem("todos") || []);
+
+const initialStateTodos = JSON.parse(localStorage.getItem("todos")) || [];
 
 const App = () => {
   const [todos, setTodos] = useState(initialStateTodos);
