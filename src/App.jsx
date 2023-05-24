@@ -1,3 +1,5 @@
+import { DragDropContext } from "@hello-pangea/dnd";
+
 import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import TodoComputed from "./components/TodoComputed";
@@ -30,6 +32,14 @@ import TodoList from "./components/TodoList";
 //
 
 const initialStateTodos = JSON.parse(localStorage.getItem("todos")) || [];
+
+const reorder = (list, startIndex, endIndex) => {
+  const result = [...list];
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
 
 const App = () => {
   const [todos, setTodos] = useState(initialStateTodos);
@@ -82,7 +92,34 @@ const App = () => {
       default:
         return todos;
     }
-    h;
+  };
+  const handleDragEnd = (result) => {
+    //manera 1
+   /*  const { destination, source } = result;
+    if (!destination) return;
+    if (
+      source.index === destination.index &&
+      source.droppableId === destination.droppableId
+    )
+      return;
+
+    setTodos((prevTasks) =>
+      reorder(prevTasks, source.index, destination.index)
+    ); */
+
+    //manera 2
+    if (!result.destination) return;
+    const startIndex = result.source.index;
+    const endIndex = result.destination.index;
+
+    const copyArray = [...todos];
+    //elimnar el item que se está moviendo
+    //ponemos [] para que nos devuelve solo objeto y no el array
+    const [reorderItem] = copyArray.splice(startIndex, 1);
+    // añadir el eleento eliminado en la posicion final de arrastre
+    copyArray.splice(endIndex, 0, reorderItem);
+
+    setTodos(copyArray);
   };
 
   return (
@@ -97,11 +134,13 @@ const App = () => {
       <main className="container mx-auto mt-8 px-4 md:max-w-xl">
         <TodoCreate createTodo={createTodo} />
 
-        <TodoList
-          todos={filterTodos()}
-          removeTodo={removeTodo}
-          updateTodo={updateTodo}
-        />
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <TodoList
+            todos={filterTodos()}
+            removeTodo={removeTodo}
+            updateTodo={updateTodo}
+          />
+        </DragDropContext>
 
         <TodoComputed
           computedItemsLeft={computedItemsLeft}
